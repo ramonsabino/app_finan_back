@@ -1,4 +1,5 @@
 const { parseISO, format, isValid } = require('date-fns');
+const { ptBR } = require('date-fns/locale');
 const RegistroAtendimento = require('../models/RegistroAtendimento');
 const Rendimento = require('../models/Rendimento');
 
@@ -27,11 +28,13 @@ const createAtendimento = async (req, res) => {
         if (!isValid(dataHoraRegistro)) {
             throw new Error(`${req.body.dataHoraRegistro} não é uma data e hora válida.`);
         }
-        const mes = format(dataHoraRegistro, 'MMMM');
+
+        // Formata o mês em português
+        const mes = format(dataHoraRegistro, 'MMMM', { locale: ptBR });
         const novoRendimento = new Rendimento({
             pagamento: req.body.pagamento,
             data: dataHoraRegistro,
-            mes: mes,
+            mes: mes.charAt(0).toUpperCase() + mes.slice(1), // Primeira letra em maiúsculo
             tipo: 'Entrada'
         });
         await novoRendimento.save();
@@ -41,5 +44,4 @@ const createAtendimento = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
-
 module.exports = { getAtendimentos, createAtendimento };
